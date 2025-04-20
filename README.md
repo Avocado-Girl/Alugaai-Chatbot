@@ -1,3 +1,3 @@
-# chatbot_alugaai
+# chatbot
 
 A new Flutter project.

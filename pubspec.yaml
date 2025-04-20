@@ -1,5 +1,5 @@
-name: chatbot_alugaai
-description: "A new Flutter project."
+name: chatbot
+description: "Chatbot component."
 publish_to: 'none'
 version: 0.1.0
 
@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'chat_widget.dart';
 
 void main() {
   runApp(const MainApp());
@@ -11,8 +12,13 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+        body: Stack(
+          children: [
+            Center(
+              child: Text('Hello World!'),
+            ),
+            ChatWidget(), // 👈 Componente do chat bot, para utilizar ele pode ser importado no projeto principal
+          ],
         ),
       ),
     );

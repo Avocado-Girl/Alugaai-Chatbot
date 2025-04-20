@@ -1,6 +1,6 @@
 {
-    "name": "chatbot_alugaai",
-    "short_name": "chatbot_alugaai",
+    "name": "chatbot",
+    "short_name": "chatbot",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
