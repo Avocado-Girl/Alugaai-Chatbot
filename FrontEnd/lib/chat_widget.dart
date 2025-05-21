@@ -1,5 +1,23 @@
 import 'package:flutter/material.dart';
-import 'services/chat_api.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+Future<String> fetchBotReply(String message) async {
+  const url = 'http://localhost:5000/chat'; // Altere se for para produção
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({"message": message}),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['reply'] ?? "Desculpe, não entendi.";
+  } else {
+    return "Erro na comunicação com o servidor.";
+  }
+}
 
 class ChatWidget extends StatefulWidget {
   const ChatWidget({Key? key}) : super(key: key);
@@ -14,7 +32,16 @@ class _ChatWidgetState extends State<ChatWidget> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  void _sendMessage() {
+  void _initializeBotMessage() {
+    if (_messages.isEmpty) {
+      setState(() {
+        _messages.add(_ChatMessage(text: "Olá! Sou o assistente virtual do Alugaai. Como posso ajudar você hoje?", isUser: false));
+      });
+      _scrollToBottom();
+    }
+  }
+
+  void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -23,20 +50,14 @@ class _ChatWidgetState extends State<ChatWidget> {
       _controller.clear();
     });
 
-    // Resposta do BOT
-    Future.delayed(const Duration(milliseconds: 300), () {
-      final botReply = _getBotResponse(text); // Respostas mockadas para teste
-      // final botReply = await fetchChatGPTReply(text); (Use chat GPT API)
+    _scrollToBottom();
 
-      setState(() {
-        _messages.add(_ChatMessage(text: botReply, isUser: false));
-      });
+    final botReply = await fetchBotReply(text);
 
-      // Scrollar pra baixo quando o BOT responder
-      _scrollToBottom();
+    setState(() {
+      _messages.add(_ChatMessage(text: botReply, isUser: false));
     });
 
-    // Scrollar pra baixo quando uma mensagem for enviada
     _scrollToBottom();
   }
 
@@ -49,28 +70,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       );
     });
   }
-
-  String _getBotResponse(String userMessage) {
-    final lower = userMessage.toLowerCase();
-
-    if (lower.contains("oi") || lower.contains("olá") || lower.contains("eae") || lower.contains("salve")) {
-      return "Oi! 👋";
-    } else if (lower.contains("ajuda")) {
-      return "Como posso te ajudar hoje?";
-    } else if (lower.contains("tchau") || lower.contains("flw") || lower.contains("adeus")) {
-      return "Até logo! Tenha um ótimo dia!";
-    } else {
-      // Random fallback
-      List<String> fallbackReplies = [
-        "Não sei se entendi sua mensagem.",
-        "Pode tentar me explicar novamente?",
-        "Interessante, conte-me mais...",
-      ];
-      fallbackReplies.shuffle();
-      return fallbackReplies.first;
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -84,6 +84,10 @@ class _ChatWidgetState extends State<ChatWidget> {
               setState(() {
                 _isChatOpen = !_isChatOpen;
               });
+
+              if (_isChatOpen) {
+                _initializeBotMessage(); 
+              }
             },
             child: Icon(_isChatOpen ? Icons.close : Icons.chat),
           ),
